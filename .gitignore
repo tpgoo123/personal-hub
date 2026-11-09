@@ -29,3 +29,6 @@ pnpm-debug.log*
 
 # TypeScript build cache
 *.tsbuildinfo
+
+# Local build temp directory
+.tmp/
