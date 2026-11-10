@@ -1,0 +1,50 @@
+.markdown-preview,
+.markdown-preview-empty {
+  color: #465247;
+  font-size: 13px;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+.markdown-preview-empty { color: #9aa397; }
+.markdown-preview > :first-child { margin-top: 0; }
+.markdown-preview > :last-child { margin-bottom: 0; }
+.markdown-preview h2,
+.markdown-preview h3,
+.markdown-preview h4 {
+  color: #2d382e;
+  line-height: 1.45;
+  margin: 1.25em 0 .55em;
+}
+.markdown-preview h2 { font-size: 20px; }
+.markdown-preview h3 { font-size: 17px; }
+.markdown-preview h4 { font-size: 14px; }
+.markdown-preview p { margin: .55em 0; white-space: pre-wrap; }
+.markdown-preview ul { padding-left: 1.5em; margin: .6em 0; }
+.markdown-preview li { margin: .25em 0; }
+.markdown-preview blockquote {
+  margin: .8em 0;
+  padding: 8px 13px;
+  border-left: 3px solid #b8c9b4;
+  background: #f6f8f5;
+  color: #667365;
+}
+.markdown-preview pre {
+  overflow-x: auto;
+  padding: 13px 15px;
+  border-radius: 8px;
+  background: #202820;
+  color: #e5eee4;
+  font-size: 12px;
+  line-height: 1.65;
+}
+.markdown-preview code {
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: #eef2ec;
+  color: #4b644e;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: .92em;
+}
+.markdown-preview pre code { padding: 0; background: transparent; color: inherit; }
+.markdown-preview a { color: #56795b; text-decoration: underline; text-underline-offset: 3px; }
+.markdown-preview hr { border: 0; border-top: 1px solid #e5eae2; margin: 1.2em 0; }
