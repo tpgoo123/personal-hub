@@ -54,9 +54,34 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' | 'forgot' }) {
         if (authError) throw authError
         setMessage('如果该邮箱已注册，系统会发送密码重置邮件，请检查收件箱。')
       } else {
-        const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
+        const { data: signInData, error: authError } =
+          await supabase.auth.signInWithPassword({ email, password })
+
         if (authError) throw authError
-        navigate('/account')
+
+        if (!signInData.user) {
+          throw new Error('登录成功，但未获取到用户信息。')
+        }
+
+        // 查询当前账号是否具有管理员角色
+        const { data: adminRole, error: roleError } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', signInData.user.id)
+          .eq('role', 'admin')
+          .maybeSingle()
+
+        if (roleError) {
+          throw new Error(
+            `登录成功，但管理员权限验证失败：${roleError.message}`
+          )
+        }
+
+        // 管理员进入后台，普通用户进入个人中心
+        navigate(
+          adminRole ? '/admin' : '/account',
+          { replace: true }
+        )
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : '操作失败，请稍后重试。')

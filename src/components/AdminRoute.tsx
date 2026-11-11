@@ -38,6 +38,7 @@ export function AdminRoute({ children }: { children: ReactNode }) {
           .from('user_roles')
           .select('role')
           .eq('user_id', user.id)
+          .eq('role', 'admin')
           .maybeSingle()
 
         if (!active) return
