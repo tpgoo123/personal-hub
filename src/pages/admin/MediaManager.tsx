@@ -45,30 +45,36 @@ export function MediaManager() {
       const collected: MediaFile[] = []
       async function walk(path: string, depth: number) {
         if (depth > 4) return
-        const { data, error } = await client.storage.from(bucket).list(path, {
-          limit: 100, offset: 0, sortBy: { column: 'created_at', order: 'desc' },
-        })
-        if (error) throw error
-        for (const item of data ?? []) {
-          const fullPath = path ? `${path}/${item.name}` : item.name
-          if (!item.id && !item.metadata) {
-            await walk(fullPath, depth + 1)
-          } else {
-            const isPrivate = bucket === 'private-files'
-            let url = ''
-            if (isPrivate) {
-              const signed = await client.storage.from(bucket).createSignedUrl(fullPath, 3600)
-              if (!signed.error) url = signed.data.signedUrl
+        let offset = 0
+        while (true) {
+          const { data, error } = await client.storage.from(bucket).list(path, {
+            limit: 100, offset, sortBy: { column: 'created_at', order: 'desc' },
+          })
+          if (error) throw error
+          const items = data ?? []
+          for (const item of items) {
+            const fullPath = path ? `${path}/${item.name}` : item.name
+            if (!item.id && !item.metadata) {
+              await walk(fullPath, depth + 1)
             } else {
-              url = client.storage.from(bucket).getPublicUrl(fullPath).data.publicUrl
+              const isPrivate = bucket === 'private-files'
+              let url = ''
+              if (isPrivate) {
+                const signed = await client.storage.from(bucket).createSignedUrl(fullPath, 3600)
+                if (!signed.error) url = signed.data.signedUrl
+              } else {
+                url = client.storage.from(bucket).getPublicUrl(fullPath).data.publicUrl
+              }
+              collected.push({
+                bucket, name: item.name, path: fullPath,
+                created_at: item.created_at ?? item.updated_at ?? undefined,
+                size: typeof item.metadata?.size === 'number' ? item.metadata.size : undefined,
+                mimeType: item.metadata?.mimetype ?? undefined, url,
+              })
             }
-            collected.push({
-              bucket, name: item.name, path: fullPath,
-              created_at: item.created_at ?? item.updated_at ?? undefined,
-              size: typeof item.metadata?.size === 'number' ? item.metadata.size : undefined,
-              mimeType: item.metadata?.mimetype ?? undefined, url,
-            })
           }
+          if (items.length < 100) break
+          offset += 100
         }
       }
       await walk('', 0)

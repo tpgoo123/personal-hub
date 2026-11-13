@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { ArrowUpRight, LockKeyhole, LogOut, Menu, Sparkles } from 'lucide-react'
+import { ArrowUpRight, LockKeyhole, LogOut, Menu, ShieldCheck, Sparkles, X } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { useAuth } from '../context/AuthContext'
 
@@ -11,43 +11,64 @@ const navItems = [
 ]
 
 export function SiteLayout({ children }: { children: ReactNode }) {
-  const { user, signOut } = useAuth()
+  const { user, isAdmin, signOut } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
   const navigate = useNavigate()
 
   async function handleSignOut() {
     try {
       await signOut()
-      navigate('/')
+      setMenuOpen(false)
+      navigate('/', { replace: true })
     } catch (error) {
-      alert(error instanceof Error ? error.message : '退出登录失败')
+      window.alert(error instanceof Error ? error.message : '退出登录失败')
     }
   }
+
+  const closeMenu = () => setMenuOpen(false)
 
   return (
     <div className="site-shell">
       <header className="topbar">
         <div className="topbar-inner">
-          <Link to="/" className="brand" aria-label="Personal Hub 首页">
+          <Link to="/" className="brand" aria-label="Personal Hub 首页" onClick={closeMenu}>
             <span className="brand-mark">P.</span>
             <span className="brand-name">PERSONAL HUB<span>.</span></span>
           </Link>
 
-          <button className="mobile-menu" onClick={() => setMenuOpen(!menuOpen)} aria-label="切换导航">
-            <Menu size={19} />
+          <button
+            type="button"
+            className="mobile-menu"
+            onClick={() => setMenuOpen(value => !value)}
+            aria-label={menuOpen ? '关闭导航菜单' : '打开导航菜单'}
+            aria-expanded={menuOpen}
+            aria-controls="primary-navigation"
+          >
+            {menuOpen ? <X size={19}/> : <Menu size={19}/>}
           </button>
 
-          <nav className={`main-nav ${menuOpen ? 'open' : ''}`}>
-            <NavLink to="/" end>首页</NavLink>
-            <NavLink to="/about">关于</NavLink>
-            {navItems.map(([label, path]) => <NavLink key={path} to={path}>{label}</NavLink>)}
+          <nav id="primary-navigation" className={`main-nav ${menuOpen ? 'open' : ''}`} aria-label="主导航">
+            <NavLink to="/" end onClick={closeMenu}>首页</NavLink>
+            <NavLink to="/about" onClick={closeMenu}>关于</NavLink>
+            {navItems.map(([label, path]) => (
+              <NavLink key={path} to={path} onClick={closeMenu}>{label}</NavLink>
+            ))}
             {user ? (
               <>
-                <NavLink to="/account" className="account-link">个人中心</NavLink>
-                <button className="nav-text-button" onClick={handleSignOut}><LogOut size={14}/> 退出</button>
+                {isAdmin && (
+                  <NavLink to="/admin" className="admin-nav-link" onClick={closeMenu}>
+                    <ShieldCheck size={14}/> 管理后台
+                  </NavLink>
+                )}
+                <NavLink to="/account" className="account-link" onClick={closeMenu}>个人中心</NavLink>
+                <button type="button" className="nav-text-button" onClick={() => void handleSignOut()}>
+                  <LogOut size={14}/> 退出
+                </button>
               </>
             ) : (
-              <Link to="/login" className="login-link"><LockKeyhole size={14}/> 登录 / 注册</Link>
+              <Link to="/login" className="login-link" onClick={closeMenu}>
+                <LockKeyhole size={14}/> 登录 / 注册
+              </Link>
             )}
           </nav>
         </div>

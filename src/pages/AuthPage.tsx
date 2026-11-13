@@ -46,10 +46,10 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' | 'forgot' }) {
         setMessage(data.session
           ? '注册成功，正在进入个人中心…'
           : '注册申请已提交。请检查邮箱并点击验证链接，然后返回网站登录。')
-        if (data.session) setTimeout(() => navigate('/account'), 900)
+        if (data.session) navigate('/account', { replace: true })
       } else if (isForgot) {
         const { error: authError } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/#/reset-password`,
+          redirectTo: `${window.location.origin}/reset-password`,
         })
         if (authError) throw authError
         setMessage('如果该邮箱已注册，系统会发送密码重置邮件，请检查收件箱。')
@@ -104,7 +104,7 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' | 'forgot' }) {
         <div className="auth-panel">
           <span className="eyebrow">{isRegister ? 'CREATE ACCOUNT' : isForgot ? 'RESET PASSWORD' : 'WELCOME BACK'}</span>
           <h2>{isRegister ? '注册账号' : isForgot ? '重置密码' : '登录 Personal Hub'}</h2>
-          <p className="muted">{isRegister ? '注册后即可收藏项目、评论文章并向管理员留言。' : isForgot ? '输入注册邮箱，我们会发送密码重置链接。' : '登录后进入个人中心。'}</p>
+          <p className="muted">{isRegister ? '注册后即可收藏项目、评论文章并向管理员留言。' : isForgot ? '输入注册邮箱，我们会发送密码重置链接。' : '管理员登录后进入后台管理，普通用户进入个人中心。'}</p>
           <form onSubmit={handleSubmit} className="form-stack">
             <label>邮箱地址<div className="input-wrap"><Mail size={17}/><input type="email" required autoComplete="email" placeholder="name@example.com" value={email} onChange={e => setEmail(e.target.value)}/></div></label>
             {!isForgot && <label>密码<div className="input-wrap"><LockKeyhole size={17}/><input type="password" required minLength={8} autoComplete={isRegister ? 'new-password' : 'current-password'} placeholder="至少 8 位" value={password} onChange={e => setPassword(e.target.value)}/></div></label>}

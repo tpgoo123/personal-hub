@@ -36,6 +36,7 @@ export function Home() {
   const [settings, setSettings] = useState<SiteSettings | null>(null)
   const [projects, setProjects] = useState<ContentRow[]>([])
   const [posts, setPosts] = useState<ContentRow[]>([])
+  const [papers, setPapers] = useState<ContentRow[]>([])
   const [counts, setCounts] = useState({
     projects: 0,
     papers: 0,
@@ -54,6 +55,7 @@ export function Home() {
         settingsResult,
         projectsResult,
         postsResult,
+        papersResult,
         projectCountResult,
         paperCountResult,
         postCountResult,
@@ -61,6 +63,7 @@ export function Home() {
         safelyLoad(fetchSiteSettings(), null),
         safelyLoad(fetchPublished('projects', 3), [] as ContentRow[]),
         safelyLoad(fetchPublished('posts', 3), [] as ContentRow[]),
+        safelyLoad(fetchPublished('papers', 3), [] as ContentRow[]),
         safelyLoad(fetchPublishedCount('projects'), 0),
         safelyLoad(fetchPublishedCount('papers'), 0),
         safelyLoad(fetchPublishedCount('posts'), 0),
@@ -71,6 +74,7 @@ export function Home() {
       setSettings(settingsResult.value)
       setProjects(projectsResult.value)
       setPosts(postsResult.value)
+      setPapers(papersResult.value)
 
       setCounts({
         projects: projectCountResult.value,
@@ -82,6 +86,7 @@ export function Home() {
         settingsResult.error,
         projectsResult.error,
         postsResult.error,
+        papersResult.error,
         projectCountResult.error,
         paperCountResult.error,
         postCountResult.error,
@@ -177,7 +182,7 @@ export function Home() {
 
             <div className="profile-card-bottom">
               <span>
-                <i /> Currently exploring AI &amp; intelligent systems
+                <i /> 持续探索 AI 与智能系统
               </span>
               <ArrowUpRight size={15} />
             </div>
@@ -253,6 +258,33 @@ export function Home() {
         ) : (
           <div className="empty-state">
             项目内容将在管理员发布后显示。
+          </div>
+        )}
+      </section>
+
+      <section className="section container">
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow">RESEARCH &amp; PUBLICATIONS</span>
+            <h2>科研成果</h2>
+            <p>持续探索问题边界，将研究过程沉淀为可复现的成果。</p>
+          </div>
+          <Link to="/papers" className="text-link">
+            全部科研 <ArrowUpRight size={15}/>
+          </Link>
+        </div>
+
+        {loading ? (
+          <div className="empty-state">正在加载科研成果…</div>
+        ) : papers.length ? (
+          <div className="card-grid">
+            {papers.map((row, i) => (
+              <ContentCard key={row.id ?? i} row={row} kind="论文"/>
+            ))}
+          </div>
+        ) : (
+          <div className="empty-state">
+            科研成果将在管理员发布后显示。
           </div>
         )}
       </section>

@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminRoute } from './components/AdminRoute'
@@ -10,6 +10,7 @@ import { Admin } from './pages/Admin'
 import { About } from './pages/About'
 import { PostDetail } from './pages/PostDetail'
 import { ResetPassword } from './pages/ResetPassword'
+import { NotFound } from './pages/NotFound'
 
 export default function App() {
   return (
@@ -29,7 +30,7 @@ export default function App() {
           <Route path="/reset-password" element={<ResetPassword/>}/>
           <Route path="/account" element={<ProtectedRoute><Account/></ProtectedRoute>}/>
           <Route path="/admin" element={<AdminRoute><Admin/></AdminRoute>}/>
-          <Route path="*" element={<Navigate to="/" replace/>}/>
+          <Route path="*" element={<NotFound/>}/>
         </Routes>
       </AuthProvider>
     </BrowserRouter>

@@ -1,196 +1,127 @@
-# Personal Hub V2.0 — 前端第一阶段
+# Personal Hub V2.1
 
-技术栈：React + TypeScript + Vite + Supabase JS + React Router（HashRouter）。
+一个用于展示个人介绍、项目作品、科研成果、技术文章和生活记录的个人网站，同时提供基于 Supabase 的用户认证与管理后台。
 
-## 已包含
+## 技术栈
 
-- 极简现代浅色首页
-- 关于我、项目、论文、博客、生活记录入口
-- Supabase 邮箱注册、密码登录、退出登录、找回密码、重置密码
-- 登录用户个人中心基础页面
-- 管理员路由守卫（从 `user_roles` 读取 `role = admin`）
-- 公开内容读取（按 `status = published`）
-- 文章详情、评论提交、文章收藏基础交互
-- 管理后台数据概览入口
-- GitHub Pages Actions 工作流
+- **前端**：React 18、TypeScript、Vite 6、React Router 6
+- **UI**：自定义 CSS、Lucide React
+- **后端服务**：Supabase Auth、PostgreSQL、Storage、Edge Functions、Row Level Security
+- **版本管理**：Git / GitHub
+- **部署**：Netlify（连接 GitHub `main` 分支，构建产物为 `dist`）
 
-## 重要说明
+## 功能模块
 
-这是前端第一阶段启动包。你现有数据库的列定义尚未在本项目中逐列核对，因此：
-- 内容列表使用 `select('*')` 并通过常见字段名显示内容；
-- 个人资料编辑会根据读取到的 profile 字段名进行匹配；
-- 评论、收藏、留言使用已在数据库策略中确认过的字段；
-- 管理后台的完整新增、编辑、删除、评论审核和用户管理将在读取完整 SQL schema 后继续实现。
+### 公开网站
+- 首页、个人介绍
+- 项目作品、科研论文、技术文章、生活记录
+- 文章详情、Markdown 内容展示、评论与收藏
+- 响应式桌面端与移动端布局
 
-请勿在未核对字段的情况下直接投入正式公开使用。
+### 用户中心
+- 邮箱和密码注册、登录、密码重置
+- 个人资料编辑
+- 项目/文章收藏与评论统计
+- 给网站管理员发送站内留言
 
-## 1. 安装 Node.js
+### 管理后台
+- 数据概览
+- 项目管理、论文管理、博客管理
+- 评论审核、管理员回复、用户留言处理
+- 用户资料、角色与账号封禁管理
+- 媒体资源管理
+- 网站个人资料与社交链接设置
 
-建议 Node.js 20 或更高版本。
+## 本地开发
 
-## 2. 解压并进入项目目录
+建议统一使用 `D:\xiazai\personal-hub-github` 作为唯一 Git 工作目录，不要在原始项目目录和 GitHub 克隆目录之间交替修改。
 
-在 Windows CMD 中进入本文件夹，例如：
+Windows PowerShell：
 
-```cmd
-cd /d D:\xiazai\personal-hub-frontend
+```powershell
+cd D:\xiazai\personal-hub-github
+npm.cmd ci
+Copy-Item .env.example .env.local
 ```
 
-## 3. 安装依赖
-
-```cmd
-npm install
-```
-
-如果 npm 提示 `esbuild` 安装脚本尚未获准，且后续构建时报 esbuild 可执行文件缺失，可按 npm 提示执行：
-
-```cmd
-npm install-scripts approve esbuild
-npm install
-```
-
-## 4. 配置 Supabase
-
-复制 `.env.example` 并命名为 `.env.local`：
-
-```cmd
-copy .env.example .env.local
-```
-
-在 Supabase Dashboard 的 Project Settings → API 中取得：
-- Project URL
-- Publishable key（或旧项目的 anon public key）
-
-填入 `.env.local`：
+编辑 `.env.local`，填写 Supabase 项目地址和浏览器端公开密钥：
 
 ```env
-VITE_SUPABASE_URL=https://你的项目引用.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=你的Publishable公钥
+VITE_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=YOUR_SUPABASE_PUBLISHABLE_KEY
 ```
 
-只使用 Publishable / anon 公钥。**绝对不要**填写 `service_role`、Secret key 或数据库密码。
+旧项目也可以使用 `VITE_SUPABASE_ANON_KEY`。两者配置一个即可。不要把 `service_role` 或 Supabase Secret Key 放入任何 `VITE_` 变量，也不要提交 `.env.local`。
 
-## 5. 配置 Supabase Auth URL
+启动本地开发服务器：
 
-Supabase Dashboard → Authentication → URL Configuration：
-
-- Site URL：本地开发时可先设为 `http://localhost:5173`
-- Redirect URLs 添加：
-  - `http://localhost:5173/**`
-  - `https://你的GitHub用户名.github.io/**`
-
-正式发布后，将 Site URL 更新为实际 GitHub Pages 地址。
-
-## 6. 启动本地网站
-
-```cmd
-npm run dev
+```powershell
+npm.cmd run dev
 ```
 
-浏览器打开终端显示的本地地址，通常为：
+默认访问 `http://localhost:5173`。
+
+生产构建与类型检查：
+
+```powershell
+npm.cmd run build
+npm.cmd run typecheck
+```
+
+## Supabase 配置说明
+
+1. 在 Supabase Project Settings → API 中获取 Project URL 和 Publishable / anon 公钥。
+2. 确认项目原有业务表、Storage buckets、RLS policies 和 `user_roles` 角色数据已经存在。
+3. 确认管理员账号在 `user_roles` 表中具有 `role = 'admin'` 的记录。
+4. 用户管理依赖 `supabase/functions/admin-users/` Edge Function。该函数使用 Supabase 服务端环境变量完成 Auth Admin API 操作，浏览器端不接触 service role 密钥。
+5. `supabase/migrations/20261110000000_admin_modules.sql` 是评论回复及多管理员支持的扩展迁移。只有在确认云端尚未执行时才运行；不要重复执行未经核对的数据库迁移。
+6. 如希望注册后直接登录，在 Supabase Authentication 设置中关闭 Confirm email。启用邮件验证时，新用户仍需先完成邮箱验证。
+
+## Netlify 部署
+
+Netlify 连接 GitHub 仓库的 `main` 分支后，会在每次 push 时自动执行：
+
+- Build command：`npm run build`
+- Publish directory：`dist`
+- Node.js：`22`
+
+在 Netlify Site configuration → Environment variables 中设置：
+
+| Name | Value |
+| --- | --- |
+| `VITE_SUPABASE_URL` | Supabase Project URL |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase Publishable / anon 公钥 |
+
+修改环境变量后需要重新触发部署。`netlify.toml` 已配置 SPA fallback，支持直接访问 `/admin`、`/posts/:id` 等前端路由。
+
+Supabase Authentication → URL Configuration 中应将线上站点设为 Site URL，并在 Redirect URLs 中允许线上地址和本地开发地址，例如：
 
 ```text
-http://localhost:5173
+https://perdt.netlify.app/
+https://perdt.netlify.app/**
+http://localhost:5173/**
 ```
 
-## 7. 生产构建
+## Git 工作流
 
-```cmd
-npm run build
+```powershell
+$Repo = "D:\xiazai\personal-hub-github"
+
+git -C $Repo status --short
+npm.cmd --prefix $Repo run build
+git -C $Repo diff --check
+git -C $Repo add -A
+git -C $Repo diff --cached --check
+git -C $Repo commit -m "feat: refine Personal Hub website"
+git -C $Repo push origin main
 ```
 
-生成的静态文件位于 `dist` 文件夹。
+推送前检查暂存区，确认没有提交 `.env.local`、`node_modules`、`dist`、密钥或无关文件。Netlify 显示 Published 后，再检查线上首页、刷新深层路由、登录、管理员后台 CRUD、文件上传和评论交互。
 
-## 8. GitHub Pages 部署
+## 安全边界
 
-1. 创建 GitHub 公开仓库。
-2. 将本项目文件上传到仓库根目录。
-3. 在仓库 Settings → Secrets and variables → Actions 添加：
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_PUBLISHABLE_KEY`
-4. Settings → Pages → Build and deployment → Source 选择 GitHub Actions。
-5. 推送到 `main` 分支，工作流自动构建并部署。
-
-由于使用 HashRouter，网站路由形如 `https://用户名.github.io/#/projects`，适合 GitHub Pages。
-
-## 安全提醒
-
-- 前端环境变量会被打包进公开网页；Publishable / anon key 本来就是可公开使用的客户端 key。
-- 数据安全必须由 PostgreSQL RLS、Storage policies 和正确的 grants 保证。
-- 绝对不能把 Supabase service_role / Secret key、数据库密码放入 `.env.local` 后提交，或写入任何 `VITE_` 变量。
-- 管理员页面的前端路由检查只是用户体验层；最终权限必须由数据库 RLS 验证。
-
-
-## 9. 管理后台完整模块
-
-当前管理后台包含以下模块：
-
-- 数据概览：注册用户、项目、论文、文章、评论和留言统计。
-- 项目管理：复用现有 ProjectsManager，支持项目 CRUD、发布/撤回、封面上传。
-- 论文管理：论文 CRUD、作者数组、期刊/会议、年份、类型、摘要、DOI、PDF 和项目链接。
-- 博客管理：文章 CRUD、Slug、分类、标签、Markdown 编辑/预览、封面、评论开关和发布状态。
-- 评论与留言：评论审核/拒绝/删除/管理员回复；查看和回复用户留言、状态更新与删除。
-- 媒体资源：浏览 `site-media`、`user-avatars`、`private-files`，上传、预览、复制链接和删除。
-- 用户管理：读取 Auth 用户、资料和角色；通过 Edge Function 封禁/解封、授予/撤销管理员角色。
-- 网站设置：编辑 `site_settings` 的首页展示名称、职业头衔、头像文字、介绍、联系邮箱、GitHub 和其他链接。
-
-## 10. 必须执行的数据库迁移
-
-在 Supabase Dashboard → SQL Editor 中打开并执行：
-
-```text
-supabase/migrations/20261110000000_admin_modules.sql
-```
-
-该迁移只做两件事：
-
-1. 创建 `comment_replies`，因为原始 `comments` 表没有回复字段。
-2. 移除原来限制单管理员的 `user_roles_single_admin_idx`，使后台可以管理多个管理员。Edge Function 会阻止移除最后一个管理员，并阻止当前管理员自行降权或封禁自己。
-
-不要重新执行完整的 `01_init_schema.sql`，也不要删除或重建现有业务表。
-
-## 11. 部署用户管理 Edge Function
-
-用户管理中的邮箱列表、封禁/解封和角色变更必须由服务端 Supabase Auth Admin API 执行。前端不会使用 `service_role` 密钥。
-
-在项目根目录执行：
-
-```bash
-supabase login
-supabase link --project-ref YOUR_PROJECT_REF
-supabase functions deploy admin-users
-```
-
-Supabase Edge Functions 会提供 `SUPABASE_URL`、`SUPABASE_ANON_KEY` 和 `SUPABASE_SERVICE_ROLE_KEY` 环境变量。若项目环境中未提供 service role 环境变量，请在 Supabase Dashboard → Edge Functions → Secrets 中配置 `SUPABASE_SERVICE_ROLE_KEY`。该密钥只能保存在服务端 Secrets，不能放进 `.env.local`，也不能使用 `VITE_` 前缀。
-
-函数入口：
-
-```text
-supabase/functions/admin-users/index.ts
-```
-
-## 12. 本地构建与运行
-
-```bash
-npm install
-npm run typecheck
-npm run build
-npm run dev
-```
-
-管理后台入口：
-
-```text
-http://localhost:5173/#/admin
-```
-
-管理后台模块通过 `#/admin?section=papers` 等查询参数保持当前模块，仍使用 HashRouter；正式部署前再统一处理 URL 和服务器路由重写。
-
-## 13. 上线前安全检查
-
-- `.env.local` 不得提交到 Git。
-- 前端只使用 Supabase Publishable / anon 公钥。
-- `service_role` / Secret key 只能存在于 Edge Function Secrets。
-- 所有业务写操作继续由 PostgreSQL RLS 约束。
-- 用户封禁和角色管理必须通过 `admin-users` Edge Function。
-- 私有文件 `private-files` 使用限时签名 URL，不应将其作为永久公开链接。
+- 浏览器只使用 Publishable / anon 公钥。
+- `service_role` 只能放在 Supabase Edge Function 等受保护的服务端环境中。
+- 前端 `AdminRoute` 只负责页面访问体验；数据库 RLS 和 Edge Function 才是最终权限边界。
+- 修改数据库前先确认当前云端表结构和迁移执行状态。
+- 删除 Storage 文件前确认没有项目、论文或文章正在引用。
